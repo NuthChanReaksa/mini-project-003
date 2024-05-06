@@ -1,0 +1,40 @@
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { getServerSession } from "next-auth";
+import prisma from "@/libs/prismadb";
+
+export async function getSession() {
+    return await getServerSession(authOptions);
+}
+
+export async function getCurrentUser() {
+    try {
+        const session = await getSession();
+
+        // Check if session is not null before proceeding
+        if (!session) {
+            return null;
+        }
+
+        // Now TypeScript knows session is not null, so it's safe to access session.user
+        if (!session.user?.email) {
+            return null;
+        }
+        const currentUser = await prisma.user.findUnique({
+            where: {
+                email: session.user.email
+            }
+        });
+        if (!currentUser){
+            return null
+        }
+        return {
+            ...currentUser,
+            createdAt: currentUser.createdAt.toISOString(),
+            updatedAt: currentUser.updatedAt.toISOString(),
+            emailValidated: currentUser.emailVerified?.toString() || null,
+        };
+
+    } catch (error: any) {
+        return null;
+    }
+}
