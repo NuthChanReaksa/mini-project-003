@@ -5,7 +5,7 @@ const Cart = () => {
     return (
         <div className={"pt-8"}>
             <Container>
-                <CartClient/>
+                <CartClient/>n
             </Container>
         </div>
     );
